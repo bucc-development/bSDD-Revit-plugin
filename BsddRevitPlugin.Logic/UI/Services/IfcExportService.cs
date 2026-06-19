@@ -245,15 +245,18 @@ namespace BsddRevitPlugin.Logic.UI.Services
                     string configData = configEntity.Get<string>(s_configMapField);
 
 #if NET48
+                    // Revit 2024's IFC UI serializes IFCExportConfiguration via System.Web's
+                    // JavaScriptSerializer, with IFCExportConfigurationConverter : JavaScriptConverter.
                     JavaScriptSerializer ser = new JavaScriptSerializer();
                     ser.RegisterConverters(new JavaScriptConverter[] { new IFCExportConfigurationConverter() });
                     IFCExportConfiguration configuration = ser.Deserialize<IFCExportConfiguration>(configData);
 #else
-                    // TODO(Revit 2025+/net8): Revit's IFC export UI no longer uses System.Web's
-                    // JavaScriptSerializer/JavaScriptConverter. This Newtonsoft round-trip pairs with
-                    // IFCExportConfiguration.SerializeConfigToJson(); validate it against the Revit
-                    // 2025/2026 IFCExportConfiguration API on a machine with Revit installed.
-                    IFCExportConfiguration configuration = JsonConvert.DeserializeObject<IFCExportConfiguration>(configData);
+                    // Revit 2025+ (.NET 8) moved to Newtonsoft.Json: IFCExportConfigurationConverter is
+                    // now a Newtonsoft JsonConverter with the custom ReadJson/DeserializeFromJson logic.
+                    // It must be passed to JsonConvert, otherwise the config does not round-trip
+                    // correctly (this pairs with IFCExportConfiguration.SerializeConfigToJson()).
+                    IFCExportConfiguration configuration = JsonConvert.DeserializeObject<IFCExportConfiguration>(
+                        configData, new IFCExportConfigurationConverter());
 #endif
 
                     if (configuration.Name == bsddExportConfigurationName)
