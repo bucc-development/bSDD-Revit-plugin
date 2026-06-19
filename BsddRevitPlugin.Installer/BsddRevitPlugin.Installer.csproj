@@ -77,14 +77,25 @@
   <ItemGroup>
     <Content Include="Installer.iss" />
   </ItemGroup>
+  <!-- Build-order only: ensure the Revit version host projects are built before ISCC packages
+       their output. This net48 project references net8 projects purely for ordering, so:
+         ReferenceOutputAssembly=false   -> link nothing from them
+         SkipGetTargetFrameworkProperties=true -> skip the TFM-compatibility check (net48 vs net8) -->
   <ItemGroup>
-    <ProjectReference Include="..\lib\asrr\lib-asrr-core\ASRR.Core.csproj">
-      <Project>{12ea4456-8cd5-43ef-80c7-d70338c8b018}</Project>
-      <Name>ASRR.Core</Name>
+    <ProjectReference Include="..\BsddRevitPlugin.2024\BsddRevitPlugin.2024.csproj">
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <SkipGetTargetFrameworkProperties>true</SkipGetTargetFrameworkProperties>
+      <Private>false</Private>
     </ProjectReference>
-    <ProjectReference Include="..\lib\asrr\lib-asrr-revit-core\ASRR.Revit.Core.csproj">
-      <Project>{60ac09bd-db0e-40a9-b8a7-b0d40e7042e6}</Project>
-      <Name>ASRR.Revit.Core</Name>
+    <ProjectReference Include="..\BsddRevitPlugin.2025\BsddRevitPlugin.2025.csproj">
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <SkipGetTargetFrameworkProperties>true</SkipGetTargetFrameworkProperties>
+      <Private>false</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\BsddRevitPlugin.2026\BsddRevitPlugin.2026.csproj">
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <SkipGetTargetFrameworkProperties>true</SkipGetTargetFrameworkProperties>
+      <Private>false</Private>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

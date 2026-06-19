@@ -6,11 +6,11 @@
 #define PluginVersion "1.9.0"
 #define PluginPublisher "bSDD Revit plugin contributors"
 #define PluginURL "https://github.com/buildingsmart-community/bSDD-Revit-plugin"
-#define RevitVersions "2023;2024";
+#define RevitVersions "2024;2025;2026";
 
 #define revitVersion "{code:GetRevitVersion}"
 ;#define buildPath "..\BsddRevitPlugin.{{#revitVersion}\bin\Release\*"
-#define installPath "{code:GetDestDir|2023}"
+#define installPath "{code:GetDestDir|2024}"
 #define iconPath "..\BsddRevitPlugin.Resources\Images\Icons\BsddLabel.ico"
 
 [Setup]
@@ -62,17 +62,23 @@ Name: "spanish"; MessagesFile: "compiler:Languages\Spanish.isl"
 Name: "turkish"; MessagesFile: "compiler:Languages\Turkish.isl"
 
 [Files]
-Source: "..\{#PluginShortName}.2023\bin\Release\Images\Icons\BsddLabel.ico"; DestDir: {userappdata}\{#PluginShortName}; Flags: ignoreversion recursesubdirs createallsubdirs; Check: IsVersionSelected('2023')
-
-; Files for Revit 2023
-Source: "..\{#PluginShortName}.2023\bin\Release\*"; DestDir: {code:GetDestDir|2023}; Flags: ignoreversion recursesubdirs createallsubdirs; Check: IsVersionSelected('2023')
-Source: "..\{#PluginShortName}.2023\{#PluginShortName}.addin"; DestDir: "{code:GetAddinsDir|2023}\"; Flags: ignoreversion recursesubdirs createallsubdirs; Check: IsVersionSelected('2023')
-Source: "..\{#PluginShortName}.Common\PackageContents.xml"; DestDir: "{code:GetDestDir|2023}"; Flags: ignoreversion recursesubdirs createallsubdirs; Check: IsVersionSelected('2023')
+; Uninstaller display icon (sourced from the Resources project's static asset).
+Source: "{#iconPath}"; DestDir: {userappdata}\{#PluginShortName}; Flags: ignoreversion
 
 ; Files for Revit 2024
 Source: "..\{#PluginShortName}.2024\bin\Release\*"; DestDir: {code:GetDestDir|2024}; Flags: ignoreversion recursesubdirs createallsubdirs; Check: IsVersionSelected('2024')
 Source: "..\{#PluginShortName}.2024\{#PluginShortName}.addin"; DestDir: "{code:GetAddinsDir|2024}\"; Flags: ignoreversion recursesubdirs createallsubdirs; Check: IsVersionSelected('2024')
 Source: "..\{#PluginShortName}.Common\PackageContents.xml"; DestDir: "{code:GetDestDir|2024}"; Flags: ignoreversion recursesubdirs createallsubdirs; Check: IsVersionSelected('2024')
+
+; Files for Revit 2025
+Source: "..\{#PluginShortName}.2025\bin\Release\*"; DestDir: {code:GetDestDir|2025}; Flags: ignoreversion recursesubdirs createallsubdirs; Check: IsVersionSelected('2025')
+Source: "..\{#PluginShortName}.2025\{#PluginShortName}.addin"; DestDir: "{code:GetAddinsDir|2025}\"; Flags: ignoreversion recursesubdirs createallsubdirs; Check: IsVersionSelected('2025')
+Source: "..\{#PluginShortName}.Common\PackageContents.xml"; DestDir: "{code:GetDestDir|2025}"; Flags: ignoreversion recursesubdirs createallsubdirs; Check: IsVersionSelected('2025')
+
+; Files for Revit 2026
+Source: "..\{#PluginShortName}.2026\bin\Release\*"; DestDir: {code:GetDestDir|2026}; Flags: ignoreversion recursesubdirs createallsubdirs; Check: IsVersionSelected('2026')
+Source: "..\{#PluginShortName}.2026\{#PluginShortName}.addin"; DestDir: "{code:GetAddinsDir|2026}\"; Flags: ignoreversion recursesubdirs createallsubdirs; Check: IsVersionSelected('2026')
+Source: "..\{#PluginShortName}.Common\PackageContents.xml"; DestDir: "{code:GetDestDir|2026}"; Flags: ignoreversion recursesubdirs createallsubdirs; Check: IsVersionSelected('2026')
 
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
