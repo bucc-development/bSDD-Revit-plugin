@@ -1,14 +1,14 @@
-﻿using BsddRevitPlugin.Logic.UI.Services;
+using BsddRevitPlugin.Logic.UI.Services;
 using CefSharp.Wpf;
 using System.Windows.Controls;
 
-namespace BsddRevitPlugin.V2023.Services
+namespace BsddRevitPlugin.V2025.Services
 {
-    public class BrowserControl2023 : Control, ICustomBrowserControl
+    public class BrowserControl2025 : Control, ICustomBrowserControl
     {
         public ChromiumWebBrowser ChromiumWebBrowser { get; private set; }
 
-        public BrowserControl2023()
+        public BrowserControl2025()
         {
             this.ChromiumWebBrowser = new CefSharp.Wpf.ChromiumWebBrowser();
         }
@@ -20,3 +20,4 @@ namespace BsddRevitPlugin.V2023.Services
 
     }
 }
+

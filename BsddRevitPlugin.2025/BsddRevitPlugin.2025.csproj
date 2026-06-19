@@ -1,0 +1,71 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Revit 2025 host project (.NET 8). Thin: delegates to the shared Common + Logic
+       libraries. Consumes the net8.0-windows target of the multi-targeted libs.
+       NOTE: must be built on a machine with Revit 2025 installed (for CefSharp). -->
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <RootNamespace>BsddRevitPlugin.V2025</RootNamespace>
+    <AssemblyName>BsddRevitPlugin</AssemblyName>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <PlatformTarget>x64</PlatformTarget>
+    <Platforms>AnyCPU;x64</Platforms>
+    <LangVersion>latest</LangVersion>
+    <Deterministic>true</Deterministic>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <!-- net8 class libraries don't copy NuGet runtime deps to bin by default; Revit needs them
+         next to the add-in (NLog in particular is not shipped by Revit). Compile-only refs
+         (CefSharp, Revit API) have no runtime assets, so they are NOT copied. -->
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
+    <PackageReference Include="NLog" Version="5.1.0" />
+    <PackageReference Include="Revit_All_Main_Versions_API_x64" Version="2025.0.0">
+      <ExcludeAssets>runtime</ExcludeAssets>
+    </PackageReference>
+    <PackageReference Include="Revit_All_Main_Versions_IFC_x64" Version="2025.0.0">
+      <ExcludeAssets>runtime</ExcludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <!-- CefSharp referenced for COMPILE ONLY: Revit ships and loads its own CefSharp at runtime.
+       .NET 8 uses the CefSharp.Wpf.NETCore package. Bump to match the CefSharp that Revit 2025
+       ships if you hit a runtime mismatch (check C:\Program Files\Autodesk\Revit 2025\CefSharp). -->
+  <ItemGroup>
+    <PackageReference Include="CefSharp.Wpf.NETCore" Version="119.4.30" IncludeAssets="compile" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BsddRevitPlugin.Logic\BsddRevitPlugin.Logic.csproj" />
+    <ProjectReference Include="..\BsddRevitPlugin.Resources\BsddRevitPlugin.Resources.csproj" />
+  </ItemGroup>
+
+  <Import Project="..\BsddRevitPlugin.Common\BsddRevitPlugin.Common.projitems" Label="Shared" />
+
+  <ItemGroup>
+    <None Update="BsddRevitPlugin.addin">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <Target Name="DeployToRevitAddins" AfterTargets="Build" Condition="'$(Configuration)' == 'Debug'">
+    <PropertyGroup>
+      <RevitAddinsDir>$(AppData)\Autodesk\Revit\Addins\2025</RevitAddinsDir>
+    </PropertyGroup>
+    <ItemGroup>
+      <DeployFiles Include="$(TargetDir)**\*.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(DeployFiles)" DestinationFiles="@(DeployFiles->'$(RevitAddinsDir)\BsddRevitPlugin\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="BsddRevitPlugin.addin" DestinationFolder="$(RevitAddinsDir)" SkipUnchangedFiles="true" />
+  </Target>
+
+</Project>
+
+

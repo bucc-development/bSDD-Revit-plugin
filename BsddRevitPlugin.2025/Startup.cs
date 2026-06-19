@@ -1,13 +1,14 @@
-﻿
+
+
 using Autodesk.Revit.UI;
 
-namespace BsddRevitPlugin.V2023
+namespace BsddRevitPlugin.V2025
 {
     public class Startup : IExternalApplication
     {
         public Result OnStartup(UIControlledApplication application)
         {
-            var serviceFactory = new Services.ServiceFactory2023();
+            var serviceFactory = new Services.ServiceFactory2025();
             var startup = new Common.Startup(application, serviceFactory);
             return startup.OnStartup(application);
         }
@@ -18,3 +19,4 @@ namespace BsddRevitPlugin.V2023
         }
     }
 }
+
