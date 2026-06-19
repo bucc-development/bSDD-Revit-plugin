@@ -44,7 +44,22 @@ namespace BsddRevitPlugin.Common
 
             if (logTarget.OpenOnStartUp)
             {
-                Process.Start(logTarget.LogFilePath);
+                OpenWithDefaultApp(logTarget.LogFilePath);
+            }
+        }
+
+        // Open a file with its associated application. UseShellExecute must be set explicitly:
+        // it defaults to false on .NET 8, where Process.Start(path) would otherwise try to *execute*
+        // the file (throwing Win32Exception) instead of opening it with the shell. Safe on net48 too.
+        private static void OpenWithDefaultApp(string path)
+        {
+            try
+            {
+                Process.Start(new ProcessStartInfo(path) { UseShellExecute = true });
+            }
+            catch
+            {
+                // Opening the log viewer is a convenience only; never let it break add-in startup.
             }
         }
 
@@ -69,10 +84,16 @@ namespace BsddRevitPlugin.Common
         {
             if (_openLogFilePath != null)
             {
-                if (!File.Exists(_openLogFilePath)) File.Create(_openLogFilePath);
-#if DEBUG
-                Process.Start(_openLogFilePath);
-#endif
+                if (!File.Exists(_openLogFilePath))
+                {
+                    // Ensure the log directory/file exist without leaking the stream handle.
+                    Directory.CreateDirectory(Path.GetDirectoryName(_openLogFilePath));
+                    File.Create(_openLogFilePath).Dispose();
+                }
+                // NOTE: we intentionally do NOT launch an editor on the log here. Auto-opening the
+                // file on every startup was fragile (and on .NET 8 threw a Win32Exception when the
+                // file was already held open by NLog). The log lives at _openLogFilePath; open it
+                // manually when needed.
             }
             else
             {

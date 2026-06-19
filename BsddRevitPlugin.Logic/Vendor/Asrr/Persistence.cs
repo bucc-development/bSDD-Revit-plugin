@@ -60,7 +60,9 @@ namespace ASRR.Core.Persistence
         {
             var filePath = FilePath<T>();
             Log.Info($"Opening file at path '{filePath}'");
-            System.Diagnostics.Process.Start(@filePath);
+            // UseShellExecute must be explicit: it defaults to false on .NET 8, where Process.Start(path)
+            // would try to execute the file instead of opening it with its associated application.
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(filePath) { UseShellExecute = true });
         }
 
         private string FilePath<T>() where T : class
