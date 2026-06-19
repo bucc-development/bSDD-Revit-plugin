@@ -16,6 +16,8 @@ using System.Linq;
 using System.Windows.Forms;
 using Document = Autodesk.Revit.DB.Document;
 using SaveFileDialog = System.Windows.Forms.SaveFileDialog;
+// On .NET 8, System.Windows.Forms also defines TaskDialog; disambiguate to the Revit one.
+using TaskDialog = Autodesk.Revit.UI.TaskDialog;
 
 
 namespace BsddRevitPlugin.Common.Commands

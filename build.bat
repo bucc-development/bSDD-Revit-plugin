@@ -1,6 +1,10 @@
 @echo off
 REM Build script for bSDD Revit Plugin
 REM Usage: build.bat [Debug|Release]
+REM
+REM Building a Revit version project requires that Revit version to be installed locally
+REM (it references CefSharp from C:\Program Files\Autodesk\Revit <year>\CefSharp).
+REM For more control use build.ps1 (supports -RevitVersions).
 
 setlocal enabledelayedexpansion
 
@@ -15,55 +19,30 @@ echo   Configuration: %CONFIG%
 echo ============================================================
 echo.
 
-REM Change to script directory
 cd /d "%~dp0"
 
-echo [1/10] Restoring NuGet packages...
+echo [1/5] Restoring NuGet packages...
 dotnet restore BsddRevitPlugin.sln
 if errorlevel 1 goto :error
 
+REM Each version project transitively builds the shared Logic + Resources libraries.
 echo.
-echo [2/10] Building ASRR.Core (AnyCPU)...
-msbuild lib\asrr\lib-asrr-core\ASRR.Core.csproj /p:Configuration=%CONFIG% /p:Platform=AnyCPU /v:minimal /nologo /restore
+echo [2/5] Building BsddRevitPlugin.2024 (Revit 2024, net48)...
+dotnet build BsddRevitPlugin.2024\BsddRevitPlugin.2024.csproj -c %CONFIG% -p:Platform=x64 --nologo -v minimal
 if errorlevel 1 goto :error
 
 echo.
-echo [3/10] Building ASRR.Core (x64)...
-msbuild lib\asrr\lib-asrr-core\ASRR.Core.csproj /p:Configuration=%CONFIG% /p:Platform=x64 /v:minimal /nologo
+echo [3/5] Building BsddRevitPlugin.2025 (Revit 2025, net8)...
+dotnet build BsddRevitPlugin.2025\BsddRevitPlugin.2025.csproj -c %CONFIG% -p:Platform=x64 --nologo -v minimal
 if errorlevel 1 goto :error
 
 echo.
-echo [4/10] Building ASRR.Revit.Core (AnyCPU)...
-msbuild lib\asrr\lib-asrr-revit-core\ASRR.Revit.Core.csproj /p:Configuration=%CONFIG% /p:Platform=AnyCPU /v:minimal /nologo /restore
+echo [4/5] Building BsddRevitPlugin.2026 (Revit 2026, net8)...
+dotnet build BsddRevitPlugin.2026\BsddRevitPlugin.2026.csproj -c %CONFIG% -p:Platform=x64 --nologo -v minimal
 if errorlevel 1 goto :error
 
 echo.
-echo [5/10] Building ASRR.Revit.Core (x64)...
-msbuild lib\asrr\lib-asrr-revit-core\ASRR.Revit.Core.csproj /p:Configuration=%CONFIG% /p:Platform=x64 /v:minimal /nologo
-if errorlevel 1 goto :error
-
-echo.
-echo [6/10] Building BsddRevitPlugin.Resources...
-msbuild BsddRevitPlugin.Resources\BsddRevitPlugin.Resources.csproj /p:Configuration=%CONFIG% /v:minimal /nologo
-if errorlevel 1 goto :error
-
-echo.
-echo [7/10] Building BsddRevitPlugin.Logic...
-msbuild BsddRevitPlugin.Logic\BsddRevitPlugin.Logic.csproj /p:Configuration=%CONFIG% /p:Platform=x64 /v:minimal /nologo
-if errorlevel 1 goto :error
-
-echo.
-echo [8/10] Building BsddRevitPlugin.2023...
-msbuild BsddRevitPlugin.2023\BsddRevitPlugin.2023.csproj /p:Configuration=%CONFIG% /p:Platform=x64 /v:minimal /nologo
-if errorlevel 1 goto :error
-
-echo.
-echo [9/10] Building BsddRevitPlugin.2024...
-msbuild BsddRevitPlugin.2024\BsddRevitPlugin.2024.csproj /p:Configuration=%CONFIG% /p:Platform=x64 /v:minimal /nologo
-if errorlevel 1 goto :error
-
-echo.
-echo [10/10] Building Installer...
+echo [5/5] Building Installer...
 
 REM Try to find Inno Setup
 set "ISCC="

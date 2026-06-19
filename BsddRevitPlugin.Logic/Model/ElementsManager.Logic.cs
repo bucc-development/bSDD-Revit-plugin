@@ -439,7 +439,8 @@ namespace BsddRevitPlugin.Logic.Model
             switch (parameter.StorageType)
             {
                 case StorageType.ElementId:
-                    return parameter.AsElementId().IntegerValue;
+                    // Revit 2024+ uses 64-bit ElementIds; .Value (long) replaces the obsolete .IntegerValue.
+                    return parameter.AsElementId().Value;
                 case StorageType.Integer:
                     return parameter.AsInteger();
                 case StorageType.None:

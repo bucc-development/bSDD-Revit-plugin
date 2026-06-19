@@ -6,12 +6,16 @@ using BsddRevitPlugin.Logic.UI.Wrappers;
 using Newtonsoft.Json;
 using NLog;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Windows;
 using static BsddRevitPlugin.Logic.UI.View.BsddSearch;
 
 namespace BsddRevitPlugin.Logic.UI.BsddBridge
 {
 
+    // Exposed to JavaScript: a CefSharp bound object (Revit 2024/2025) and a WebView2 host object
+    // (Revit 2026); the latter requires the type to be COM-visible.
+    [ComVisible(true)]
     public class BsddSearchBridge
     {
 

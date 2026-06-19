@@ -71,11 +71,30 @@ build.bat
 .\build.ps1 -BuildInstallerOnly
 ```
 
+### Supported Revit versions
+
+| Revit | Runtime | Embedded browser | Plugin project |
+|-------|---------|------------------|----------------|
+| 2024  | .NET Framework 4.8 | CefSharp 105 | `BsddRevitPlugin.2024` (net48) |
+| 2025  | .NET 8 | CefSharp 119 | `BsddRevitPlugin.2025` (net8.0-windows) |
+| 2026  | .NET 8 | WebView2 | `BsddRevitPlugin.2026` (net8.0-windows) |
+
+The shared `BsddRevitPlugin.Logic` and `BsddRevitPlugin.Resources` libraries are **multi-targeted**
+(`net48;net8.0-windows`); each version project automatically consumes the matching target.
+
+The browser assemblies (CefSharp for 2024/2025, WebView2 for 2026) are referenced from NuGet for
+**compile only** — Revit ships and loads them at runtime, so they are not deployed with the add-in.
+Revit 2026 dropped CefSharp, so its version project uses a WebView2-based browser implementation.
+
+> Revit 2023 is no longer supported (it required a separate .NET Framework lowest-common-denominator build).
+
 ### Prerequisites
 
-- **Visual Studio 2019 or later** with .NET Framework 4.8 development tools
-- **.NET SDK** (for `dotnet` commands)
-- **MSBuild** (included with Visual Studio)
+- **Visual Studio 2022 (17.8+)** with the **.NET desktop** workload (needed for .NET 8 / Revit 2025+)
+- **.NET 8 SDK** (for `dotnet` commands)
+- All NuGet dependencies (Revit API, CefSharp/WebView2) are restored from NuGet, so **Revit does
+  not need to be installed to compile**. You do of course need the matching Revit version installed
+  to *run/debug* the plugin.
 - **Inno Setup 6** (for building the installer)
   ```powershell
   winget install --id=JRSoftware.InnoSetup --exact --silent
@@ -90,20 +109,12 @@ If you prefer to build manually or need more control:
    dotnet restore BsddRevitPlugin.sln
    ```
 
-2. **Build all projects:**
+2. **Build the version project(s)** (each transitively builds the shared `Logic` + `Resources` libs):
    ```powershell
-   # ASRR Core libraries
-   msbuild lib\asrr\lib-asrr-core\ASRR.Core.csproj /p:Configuration=Release /p:Platform=AnyCPU /restore
-   msbuild lib\asrr\lib-asrr-core\ASRR.Core.csproj /p:Configuration=Release /p:Platform=x64
-
-   msbuild lib\asrr\lib-asrr-revit-core\ASRR.Revit.Core.csproj /p:Configuration=Release /p:Platform=AnyCPU /restore
-   msbuild lib\asrr\lib-asrr-revit-core\ASRR.Revit.Core.csproj /p:Configuration=Release /p:Platform=x64
-
-   # Plugin projects
-   msbuild BsddRevitPlugin.Resources\BsddRevitPlugin.Resources.csproj /p:Configuration=Release
-   msbuild BsddRevitPlugin.Logic\BsddRevitPlugin.Logic.csproj /p:Configuration=Release /p:Platform=x64
-   msbuild BsddRevitPlugin.2023\BsddRevitPlugin.2023.csproj /p:Configuration=Release /p:Platform=x64
-   msbuild BsddRevitPlugin.2024\BsddRevitPlugin.2024.csproj /p:Configuration=Release /p:Platform=x64
+   # Build only the versions whose Revit you have installed.
+   dotnet build BsddRevitPlugin.2024\BsddRevitPlugin.2024.csproj -c Release -p:Platform=x64
+   dotnet build BsddRevitPlugin.2025\BsddRevitPlugin.2025.csproj -c Release -p:Platform=x64
+   dotnet build BsddRevitPlugin.2026\BsddRevitPlugin.2026.csproj -c Release -p:Platform=x64
    ```
 
 3. **Build the installer:**
@@ -123,7 +134,7 @@ For more details about the installer, see [BsddRevitPlugin.Installer/README.md](
    - just you (plugin is installed in "C:\Users\%USERNAME%\AppData\Roaming\Autodesk\Revit\Addins\")
    - all users, **needing admin privilages to install** (plugin is installed in (C:\ProgramData\Autodesk\Revit\Addins\)
 6. Select installation language
-7. Select Revit versions to install for (2023 and 2024 currently)
+7. Select Revit versions to install for (2024, 2025 and 2026 currently)
 8. Accept [MIT license](https://github.com/buildingsmart-community/bSDD-Revit-plugin/blob/main/LICENSE)
 9. Select start menu folder to get a shortcut to the uninstaller.
 
@@ -140,13 +151,13 @@ For more details about the installer, see [BsddRevitPlugin.Installer/README.md](
 - File → Clone repository... → URL → https://github.com/buildingsmart-community/bSDD-Revit-plugin.git
 - Repository → Open in PowerShell
 
-### Update submodules from PowerShell
-- ```git submodule init```
-- ```git submodule foreach --recursive git checkout dev```
+> **Note:** The ASRR helper code that used to come from the `lib/asrr` git submodules is now
+> vendored directly into `BsddRevitPlugin.Logic` (see `Vendor/Asrr/`), so the submodules are no
+> longer required to build. The `git submodule init` step is optional.
 
 ### Setup the project in Visual Studio
 - File → Open → Project/Solution... → BsddRevitPlugin.sln
 - Switch platform from "Any CPU" to x64 (because we use CefSharp)
-- Choose a preferred Revit project as startup project (right-click BsddRevitPlugin.2023/2024 in solution explorer → Set as Startup Project)
-- Make Revit start om debug (right-click BsddRevitPlugin.2023/2024 in solution explorer → Properties → Debug → Start external program: ```C:\Program Files\Autodesk\Revit 2024\Revit.exe```)
+- Choose a preferred Revit project as startup project (right-click BsddRevitPlugin.2024/2025/2026 in solution explorer → Set as Startup Project)
+- Make Revit start on debug (right-click the version project → Properties → Debug → Start external program: ```C:\Program Files\Autodesk\Revit <year>\Revit.exe```)
 - run debug...

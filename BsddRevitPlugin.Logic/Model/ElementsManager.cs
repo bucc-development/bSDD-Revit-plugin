@@ -150,8 +150,9 @@ namespace BsddRevitPlugin.Logic.Model
                     else
                     {
                         //Get the elementType
-                        int idInt = Convert.ToInt32(ifcEntity.Tag);
-                        ElementId typeId = new ElementId(idInt);
+                        // Revit 2024+ uses 64-bit ElementIds; parse as long to avoid truncating large ids.
+                        long idLong = Convert.ToInt64(ifcEntity.Tag);
+                        ElementId typeId = new ElementId(idLong);
                         ElementType elementType = doc.GetElement(typeId) as ElementType;
                         using (Transaction tx = new Transaction(doc))
                         {
@@ -244,8 +245,9 @@ namespace BsddRevitPlugin.Logic.Model
                     {
 
                         //Get the elementType
-                        int idInt = Convert.ToInt32(ifcEntity.Tag);
-                        ElementId typeId = new ElementId(idInt);
+                        // Revit 2024+ uses 64-bit ElementIds; parse as long to avoid truncating large ids.
+                        long idLong = Convert.ToInt64(ifcEntity.Tag);
+                        ElementId typeId = new ElementId(idLong);
                         ElementType elementType = doc.GetElement(typeId) as ElementType;
 
                         //Get all instances of the elementtype

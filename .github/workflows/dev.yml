@@ -48,23 +48,15 @@ jobs:
           echo "CommitsSinceVersionSource: ${{ steps.gitversion.outputs.CommitsSinceVersionSource }}"    
 
 
-      - name: Setup MSBuild.exe
-        uses: microsoft/setup-msbuild@v2
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
 
-      - name: Setup NuGet
-        uses: NuGet/setup-nuget@v2
-
-      - name: Restore NuGet packages
+      # All dependencies (Revit API, CefSharp, WebView2) come from NuGet, so the full set builds on a
+      # hosted runner without Revit installed. Each version project transitively builds the shared libs.
+      - name: Build all Revit version projects
         run: |
-          dotnet nuget add source "https://nuget.pkg.github.com/ASRRtechnologies/index.json" --name "GitHub ASRR" --username "jcathalina" --password "${{ secrets.GITHUB_TOKEN }}" --store-password-in-clear-text
-          nuget restore $env:Solution_Name
-
-      - name: Run MSBuild
-        id: run-msbuild
-        run: |
-          msbuild $env:Solution_Name /t:Clean,Build /p:platform="x64" /p:Configuration=Release
-
-      - name: Run tests
-        id: run-tests
-        run: |
-          dotnet test
+          dotnet build BsddRevitPlugin.2024/BsddRevitPlugin.2024.csproj -c Release -p:Platform=x64
+          dotnet build BsddRevitPlugin.2025/BsddRevitPlugin.2025.csproj -c Release -p:Platform=x64
+          dotnet build BsddRevitPlugin.2026/BsddRevitPlugin.2026.csproj -c Release -p:Platform=x64

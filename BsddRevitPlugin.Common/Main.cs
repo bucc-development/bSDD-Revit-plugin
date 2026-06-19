@@ -2,6 +2,7 @@
 using Autodesk.Revit.UI;
 using BsddRevitPlugin.Logic.UI.View;
 using NLog;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
@@ -49,10 +50,15 @@ namespace BsddRevitPlugin.Common
 
         private NLogBasedLogConfiguration CreateLogTarget()
         {
+            // Store logs under the per-user local app data folder so it works without a hardcoded C:\TEMP.
+            var logFilePath = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "BsddRevitPlugin", "logs", "main.log");
+
             return new NLogBasedLogConfiguration
             {
-                LogFilePath = "C:\\TEMP\\logs\\template\\main.log",
-                LogName = "TemplateMainLog",
+                LogFilePath = logFilePath,
+                LogName = "BsddRevitPluginMainLog",
                 MinLevel = "Trace",
                 OpenOnStartUp = false,
                 NameFilter = "*"

@@ -1,229 +1,84 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Multi-targeted shared logic library.
+      net48           -> Revit 2024 (.NET Framework 4.8)
+      net8.0-windows  -> Revit 2025 / 2026 (.NET 8)
+    The matching Revit version project (BsddRevitPlugin.2024 / .2025 / .2026) references this
+    project and automatically consumes the right target framework.
+  -->
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">x64</Platform>
-    <ProjectGuid>{4ADB19D3-24D7-4410-BDCB-19DBFE6908EB}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <TargetFrameworks>net48;net8.0-windows</TargetFrameworks>
     <RootNamespace>BsddRevitPlugin.Logic</RootNamespace>
     <AssemblyName>BsddRevitPlugin.Logic</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>latest</LangVersion>
     <Deterministic>true</Deterministic>
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <!-- Keep the existing hand-written Properties\AssemblyInfo.cs -->
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <!-- Revit add-ins must not ship their own copy of the shared NuGet libs that Revit already loads;
+         copy only what Revit does not provide. Newtonsoft/NLog handled per-package below. -->
+    <AppendTargetFrameworkToOutputPath>true</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DebugType>full</DebugType>
-    <PlatformTarget>x64</PlatformTarget>
-    <LangVersion>7.3</LangVersion>
-    <ErrorReport>prompt</ErrorReport>
+
+  <!-- Per-target compile constant so version-sensitive code can branch (e.g. REVIT2024 vs REVIT2026). -->
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net48'">
+    <DefineConstants>$(DefineConstants);REVIT2024</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>x64</PlatformTarget>
-    <LangVersion>7.3</LangVersion>
-    <ErrorReport>prompt</ErrorReport>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net8.0-windows'">
+    <DefineConstants>$(DefineConstants);REVIT2025_OR_GREATER</DefineConstants>
   </PropertyGroup>
+
+  <!-- Shared third-party packages (these DO get copied next to the add-in). -->
   <ItemGroup>
-    <Reference Include="AdWindows, Version=5.0.3.1, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Revit_All_Main_Versions_API_x64.2024.0.0\lib\net48\AdWindows.dll</HintPath>
-      <SpecificVersion>False</SpecificVersion>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="ASRR.Core, Version=1.0.0.0, Culture=neutral, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\ASRR.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="ASRR.Revit.Core, Version=1.0.0.0, Culture=neutral, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\ASRR.Revit.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="Autodesk.IFC.Export.UI, Version=24.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Revit_All_Main_Versions_IFC_x64.2024.0.0\lib\net48\Autodesk.IFC.Export.UI.dll</HintPath>
-      <SpecificVersion>False</SpecificVersion>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.13.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="NLog, Version=5.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
-      <HintPath>..\packages\NLog.5.1.0\lib\net46\NLog.dll</HintPath>
-    </Reference>
-    <Reference Include="PresentationCore" />
-    <Reference Include="PresentationFramework" />
-    <Reference Include="Revit.IFC.Common, Version=24.0.0.0, Culture=neutral, processorArchitecture=AMD64">
-      <HintPath>..\packages\Revit_All_Main_Versions_IFC_x64.2024.0.0\lib\net48\Revit.IFC.Common.dll</HintPath>
-      <SpecificVersion>False</SpecificVersion>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Revit.IFC.Export, Version=24.0.0.0, Culture=neutral, processorArchitecture=AMD64">
-      <HintPath>..\packages\Revit_All_Main_Versions_IFC_x64.2024.0.0\lib\net48\Revit.IFC.Export.dll</HintPath>
-      <SpecificVersion>False</SpecificVersion>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Revit.IFC.Import, Version=24.0.0.0, Culture=neutral, processorArchitecture=AMD64">
-      <HintPath>..\packages\Revit_All_Main_Versions_IFC_x64.2024.0.0\lib\net48\Revit.IFC.Import.dll</HintPath>
-      <SpecificVersion>False</SpecificVersion>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Revit.IFC.Import.Core, Version=24.0.0.0, Culture=neutral, processorArchitecture=AMD64">
-      <HintPath>..\packages\Revit_All_Main_Versions_IFC_x64.2024.0.0\lib\net48\Revit.IFC.Import.Core.dll</HintPath>
-      <SpecificVersion>False</SpecificVersion>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="RevitAPI, Version=24.0.0.0, Culture=neutral, processorArchitecture=AMD64">
-      <HintPath>..\packages\Revit_All_Main_Versions_API_x64.2024.0.0\lib\net48\RevitAPI.dll</HintPath>
-      <SpecificVersion>False</SpecificVersion>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="RevitAPIIFC, Version=24.0.0.0, Culture=neutral, processorArchitecture=AMD64">
-      <HintPath>..\packages\Revit_All_Main_Versions_IFC_x64.2024.0.0\lib\net48\RevitAPIIFC.dll</HintPath>
-      <SpecificVersion>False</SpecificVersion>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="RevitAPIUI, Version=24.0.0.0, Culture=neutral, processorArchitecture=AMD64">
-      <HintPath>..\packages\Revit_All_Main_Versions_API_x64.2024.0.0\lib\net48\RevitAPIUI.dll</HintPath>
-      <SpecificVersion>False</SpecificVersion>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="System" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
+    <PackageReference Include="NLog" Version="5.1.0" />
+    <PackageReference Include="System.Drawing.Common" Version="8.0.0" />
+  </ItemGroup>
+
+  <!-- Revit API + IFC exporter, per target framework. compile-time only (Revit provides them at runtime). -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
+    <PackageReference Include="Revit_All_Main_Versions_API_x64" Version="2024.0.0">
+      <ExcludeAssets>runtime</ExcludeAssets>
+    </PackageReference>
+    <PackageReference Include="Revit_All_Main_Versions_IFC_x64" Version="2024.0.0">
+      <ExcludeAssets>runtime</ExcludeAssets>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0-windows'">
+    <PackageReference Include="Revit_All_Main_Versions_API_x64" Version="2025.0.0">
+      <ExcludeAssets>runtime</ExcludeAssets>
+    </PackageReference>
+    <PackageReference Include="Revit_All_Main_Versions_IFC_x64" Version="2025.0.0">
+      <ExcludeAssets>runtime</ExcludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <!-- .NET Framework assemblies that are not implicitly referenced by the SDK for net48.
+       (On net8 these are all part of the shared framework.) -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
     <Reference Include="System.Configuration" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Drawing.Common, Version=8.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Drawing.Common.8.0.0\lib\net462\System.Drawing.Common.dll</HintPath>
-    </Reference>
-    <Reference Include="System.IO.Compression" />
-    <Reference Include="System.Reflection.Context" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Web.Extensions" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xaml" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.IO.Compression" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Reflection.Context" />
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xml" />
-    <Reference Include="UIFramework, Version=24.0.0.0, Culture=neutral, processorArchitecture=AMD64">
-      <HintPath>..\packages\Revit_All_Main_Versions_API_x64.2024.0.0\lib\net48\UIFramework.dll</HintPath>
-      <SpecificVersion>False</SpecificVersion>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UserInterfaceUtility, Version=24.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Revit_All_Main_Versions_IFC_x64.2024.0.0\lib\net48\UserInterfaceUtility.dll</HintPath>
-      <SpecificVersion>False</SpecificVersion>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="WindowsBase" />
-    <Reference Include="Wpf.Ui, Version=2.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\WPF-UI.2.1.0\lib\net472\Wpf.Ui.dll</HintPath>
-    </Reference>
   </ItemGroup>
+
+  <!-- Content copied next to the add-in (parameter mapping + settings templates). -->
   <ItemGroup>
-    <Compile Include="Commands\RelayCommand.cs" />
-    <Compile Include="IfcExport\IfcPostprocessor.cs" />
-    <Compile Include="IfcJson\IfcJson.cs" />
-    <Compile Include="IfcJson\IfcJsonConverter.cs" />
-    <Compile Include="Model\ElementsManager.cs" />
-    <Compile Include="Model\ElementsManager.Logic.cs" />
-    <Compile Include="Settings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-      <DependentUpon>Settings.settings</DependentUpon>
-    </Compile>
-    <Compile Include="Utilities\IfcParameterMappings.cs" />
-    <Compile Include="Model\SettingsManager.cs" />
-    <Compile Include="Model\IfcClassificationManager.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Resources\IfcDataExample.cs" />
-    <Compile Include="UI\BsddBridge\BsddBridgeData.cs" />
-    <Compile Include="UI\BsddBridge\BsddSearchBridge.cs" />
-    <Compile Include="UI\BsddBridge\BsddSelectionBridge.cs" />
-    <Compile Include="UI\DockablePanel\Selectors.cs" />
-    <Compile Include="UI\Services\GlobalServiceFactory.cs" />
-    <Compile Include="UI\Services\IBrowserService.cs" />
-    <Compile Include="UI\Services\IfcExportService.cs" />
-    <Compile Include="UI\Services\IServiceFactory.cs" />
-    <Compile Include="UI\Services\ICustomBrowserControl.cs" />
-    <Compile Include="UI\Services\IIfcExportService.cs" />
-    <Compile Include="UI\Translations\LanguageConverter.cs" />
-    <Compile Include="UI\View\BsddSelection.xaml.cs">
-      <DependentUpon>BsddSelection.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="UI\View\BsddSearch.xaml.cs">
-      <DependentUpon>BsddSearch.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="UI\Wrappers\MethodsWrapped.cs" />
-    <Compile Include="UI\Wrappers\RevitEventWrapper.cs" />
-    <Compile Include="Utilities\FileHandling.cs" />
-    <Compile Include="Utilities\IfcProperties.cs" />
-    <Compile Include="Utilities\ParameterDataManagement.cs" />
-    <Compile Include="Utilities\Parameters.cs" />
-    <Compile Include="Utilities\UuidFromUri.cs" />
+    <None Update="Resources\IFC Shared Parameters - bSDD Revit Plugin.txt" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="Resources\UDPS-Quantities.txt" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="Resources\UDPS-Quantities-4x3.txt" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="UI\Settings\BsddSettings.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="app.config" />
-    <None Include="packages.config" />
-    <None Include="Resources\IFC Shared Parameters - bSDD Revit Plugin.xlsx" />
-    <None Include="Resources\ifcDataFromBsddExample.json" />
-    <None Include="Resources\ifcDataFromRevitExample.json" />
-    <None Include="Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
-    <None Include="UI\Settings\BsddSettings.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Page Include="UI\View\BsddSelection.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="UI\View\BsddSearch.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="UI\ViewModel\" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\lib\asrr\lib-asrr-core\ASRR.Core.csproj">
-      <Project>{12ea4456-8cd5-43ef-80c7-d70338c8b018}</Project>
-      <Name>ASRR.Core</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\lib\asrr\lib-asrr-revit-core\ASRR.Revit.Core.csproj">
-      <Project>{60ac09bd-db0e-40a9-b8a7-b0d40e7042e6}</Project>
-      <Name>ASRR.Revit.Core</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\IFC Shared Parameters - bSDD Revit Plugin.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="Resources\UDPS-Quantities-4x3.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\UDPS-Quantities.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-  </Target>
+
 </Project>

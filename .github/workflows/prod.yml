@@ -45,27 +45,25 @@ jobs:
       - name: Setup MSBuild.exe
         uses: microsoft/setup-msbuild@v2
 
-      - name: Setup NuGet
-        uses: NuGet/setup-nuget@v2
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
 
       - name: Restore NuGet packages
-        run: |
-          dotnet nuget add source "https://nuget.pkg.github.com/ASRRtechnologies/index.json" --name "GitHub ASRR" --username "jcathalina" --password "${{ secrets.GITHUB_TOKEN }}" --store-password-in-clear-text
-          nuget restore $env:Solution_Name 
+        run: dotnet restore $env:Solution_Name
 
       # Update the version inside of the .iss file
       - name: Updating the version into the installer
-        run: (Get-Content BsddRevitPlugin.Installer/Installer.iss) -replace 'MyAppVersion "1.0.0"', 'MyAppVersion "v${{ steps.gitversion.outputs.majorMinorPatch }}"' | Out-File -encoding ASCII BsddRevitPlugin.Installer/Installer.iss
+        run: (Get-Content BsddRevitPlugin.Installer/Installer.iss) -replace 'PluginVersion "[0-9]+\.[0-9]+\.[0-9]+"', 'PluginVersion "${{ steps.gitversion.outputs.majorMinorPatch }}"' | Out-File -encoding ASCII BsddRevitPlugin.Installer/Installer.iss
 
-      - name: Run MSBuild
-        id: run-msbuild
+      # All dependencies (Revit API, CefSharp, WebView2) come from NuGet, so this builds on a
+      # GitHub-hosted runner without Revit installed.
+      - name: Build version projects (Release, x64)
         run: |
-          msbuild $env:Solution_Name /t:Clean,Build /p:platform="x64" /p:Configuration=Release
-
-      - name: Run tests
-        id: run-tests
-        run: |
-          dotnet test
+          dotnet build BsddRevitPlugin.2024/BsddRevitPlugin.2024.csproj -c Release -p:Platform=x64
+          dotnet build BsddRevitPlugin.2025/BsddRevitPlugin.2025.csproj -c Release -p:Platform=x64
+          dotnet build BsddRevitPlugin.2026/BsddRevitPlugin.2026.csproj -c Release -p:Platform=x64
 
       - name: Install Inno Setup
         run: |

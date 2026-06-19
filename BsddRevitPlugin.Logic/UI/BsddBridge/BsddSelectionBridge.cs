@@ -10,6 +10,7 @@ using BsddRevitPlugin.Logic.Utilities;
 using Newtonsoft.Json;
 using NLog;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
@@ -19,8 +20,10 @@ namespace BsddRevitPlugin.Logic.UI.BsddBridge
 
     /// <summary>
     /// Represents a bridge for interacting with the bSDD selection UI.
-    /// This class is exposed to JavaScript in CefSharp.
+    /// This class is exposed to JavaScript: as a CefSharp bound object (Revit 2024/2025) and as a
+    /// WebView2 host object (Revit 2026); the latter requires the type to be COM-visible.
     /// </summary>
+    [ComVisible(true)]
     public class BsddSelectionBridge
     {
         private ExternalEvent _bsddLastSelectionEvent;
